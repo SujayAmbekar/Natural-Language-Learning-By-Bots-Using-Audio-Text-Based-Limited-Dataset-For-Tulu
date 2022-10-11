@@ -29,21 +29,54 @@ class App:
             logging.error("{query} raised an error: \n {exception}".format(query=query, exception=exception))
             raise
 
+#RETURNING TRANSLATION OF TULU WORD
+    def translate_tulu(self, tuluW):
+        with self.driver.session() as session:
+            result = session.read_transaction(self._translate_tulu, tuluW)
+            for row in result:
+                print("The translation of "+tuluW+ " is {w1} if the word type is {w2}.".format(w1=row['word'], w2=row['type']))
+            return [(row['word'], row['type']) for row in result]
+
+    @staticmethod
+    def _translate_tulu(tx, tuluW):
+        query = ("MATCH (a)-[r:TL]->(b) "
+                "WHERE b.name = $tuluW "
+                "RETURN a.name AS word, r.type AS type")
+        result = tx.run(query, tuluW=tuluW)
+        return [{"word": row["a"]["name"], "type": row["b"]["type"]} for row in result]
+
+#RETURNING TRANSLATION OF ENGLISH WORD
+    def translate_english(self, engW, type):
+        with self.driver.session() as session:
+            result = session.read_transaction(self._translate_engW, engW, type)
+            for row in result:
+                print("The translation of "+engW+ " is {a}.".format(w1=row['word'], w2=row['type']))
+            return [row['word'] for row in result]
+
+    @staticmethod
+    def _translate_engW(tx, engW, type):
+        query = ("MATCH (a)-[r:TL]->(b) "
+                "WHERE a.name = $engW, r.type = $type"
+                "RETURN b.name AS word")
+        result = tx.run(query, engW=engW, type=type)
+        return [{"word": row["w"]["word"]} for row in result]
 
 #CONNECTION CREATION
-    def create_link(self, engW, tuluW, type):
+    def create_link(self, engW, tuluW, type, gender):
+        print("Creating link")
         with self.driver.session() as session:
-            result = session.write_transaction(self._create_link, engW, tuluW, type)
+            result = session.write_transaction(self._create_link, engW, tuluW, type, gender)
             for row in result:
                 print("Created link between: {w1}, {w2}".format(w1=row['a'], w2=row['b']))
 
     @staticmethod
-    def _create_link(tx, engW, tuluW, type):
+    def _create_link(tx, engW, tuluW, type, gender):
+        print("Creating link part 2")
         query = ("MATCH (a:word), (b:word) "
             "WHERE a.name = $engW AND b.name = $tuluW "
-            "CREATE (a)-[r:TL {type:$type}]->(b) "
+            "CREATE (a)-[r:TL {type:$type, gender:$gender}]->(b) "
             "RETURN a, b")
-        result = tx.run(query, engW=engW, tuluW=tuluW, type=type)
+        result = tx.run(query, engW=engW, tuluW=tuluW, type=type, gender = gender)
         try:
             return [{"a": row["a"]["name"], "b": row["b"]["name"]} for row in result]
         # Capture any errors along with the query and data for traceability
@@ -54,16 +87,18 @@ class App:
 
 #FINDING NODE
     def find_word(self, word):
+        print("Finding node")
         with self.driver.session() as session:
             result = session.read_transaction(self._find_and_return_word, word)
             for row in result:
                 print("Found word: {row}".format(row=row))
-                return 1
+                return row
             return 0
 
 
     @staticmethod
     def _find_and_return_word(tx, word):
+        print("Finding node part 2")
         query = (
             "MATCH (w:word) "
             "WHERE w.name = $word "
@@ -75,18 +110,42 @@ class App:
 #CHECKING CONNECTION BETWEEN TWO NODES
 
     def find_link(self, eng, tulu):
+        print("Finding link")
         with self.driver.session() as session:
             result = session.read_transaction(self._find_and_return_link, eng, tulu)
             for row in result:
                 print("Found connection: {row}".format(row=row))
                 return row
+            return 0
 
     @staticmethod
     def _find_and_return_link(tx, eng, tulu):
+        print("Finding link part 2")
         query = (
-            "MATCH (e:word), (t:word) "
+            "MATCH (e:word)-[r:TL]->(t:word) "
             "WHERE e.name = $eng and t.name= $tulu "
-            "RETURN exists((e)-[:TL]->(t)) AS translation"
-        )
+            "RETURN r.type AS type"
+            )
+        #return TL word type instead of exists
         result = tx.run(query, eng=eng, tulu=tulu)
-        return [row["translation"] for row in result]
+        return [row["type"] for row in result]
+
+#FINDING ONE INSTANCE OF A WORD TYPE
+
+    def find_same_type(self, type):
+        with self.driver.session() as session:
+            result = session.read_transaction(self._find_and_return_same_type, type)
+            for row in result:
+                print("Found word: {row}".format(row=row))
+                return [row["name"] for row in result]
+
+    @staticmethod
+    def _find_and_return_same_type(tx, type):
+        query = (
+            "MATCH (e:word)-[r:TL]->(t:word) "
+            "WHERE r.type = $type "
+            "RETURN t.name AS name "
+            "LIMIT 1"
+        )
+        result = tx.run(query, type=type)
+        return [row["name"] for row in result]

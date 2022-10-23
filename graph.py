@@ -39,27 +39,27 @@ class App:
 
     @staticmethod
     def _translate_tulu(tx, tuluW):
-        query = ("MATCH (a)-[r:TL]->(b) "
+        query = ("MATCH (b)-[r:TL]->(a) "
                 "WHERE b.name = $tuluW "
                 "RETURN a.name AS word, r.type AS type")
         result = tx.run(query, tuluW=tuluW)
-        return [{"word": row["a"]["name"], "type": row["b"]["type"]} for row in result]
+        return [{"word": row["word"], "type": row["type"]} for row in result]
 
 #RETURNING TRANSLATION OF ENGLISH WORD
     def translate_english(self, engW, type):
         with self.driver.session() as session:
             result = session.read_transaction(self._translate_engW, engW, type)
             for row in result:
-                print("The translation of "+engW+ " is {a}.".format(w1=row['word'], w2=row['type']))
+                print("The translation of "+engW+ " is {a}.".format(a=row['word']))
             return [row['word'] for row in result]
 
     @staticmethod
     def _translate_engW(tx, engW, type):
-        query = ("MATCH (a)-[r:TL]->(b) "
-                "WHERE a.name = $engW, r.type = $type"
+        query = ("MATCH (b)-[r:TL]->(a) "
+                "WHERE a.name = $engW AND r.type = $type "
                 "RETURN b.name AS word")
         result = tx.run(query, engW=engW, type=type)
-        return [{"word": row["w"]["word"]} for row in result]
+        return [{"word": row["word"]} for row in result]
 
 #CONNECTION CREATION
     def create_link(self, engW, tuluW, type, gender):

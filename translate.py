@@ -1,28 +1,38 @@
 import audio
 from WordErrorRate import wer
+import string
+from graph import App
+import nltk
+
+def removePunctuation(sentence):
+    x = sentence.replace("'", "")
+    y = x.translate(str.maketrans('', '', string.punctuation))
+    y = y.lower()
+    return y
 
 def translateTulu(text, app):
     wordList = removePunctuation(text).split(" ")
     tl = []
     for word in wordList:
-        translations = tlw(word, app)
+        translations = tlt(word, app)
+        tl.append(translations[0])
+    return(" ".join(tl))
 
 def translateEnglish(text, app):
-    wordList = nltk.pos_tag(removePunctuation(text))
+    wordList = nltk.pos_tag(removePunctuation(text).split())
     tl = []
     for word in wordList:
-        translations = tle(word, app)
-        print(translations[0])
+        translations = tle(word[0], word[1], app)
+        tl.append(translations[0])
+    return(" ".join(tl))
 
 def tle(eword, pos, app):
     #refine for multi translation case
-    print(app.translateEnglish(eWord, pos))
-    return app.translateEnglish(eword, pos)
+    return app.translate_english(eword, pos)
 
 def tlt(tword, app):
     #refine for multi translation case
-    print(app.translateTulu(tWord))
-    return app.translateTulu(tWord)
+    return app.translate_tulu(tword)
 
 def translate_path(f, sent):
     trans = []
@@ -35,9 +45,10 @@ def translate_path(f, sent):
     print(' '.join(trans)+'.')
     return
 
-def test_tls(f, app):
+def test_tls(app):
     a = []
-    f = open("data.csv", "r", encoding='utf-8')
+    f = open("testdata.csv", "r", encoding='utf-8')
+    #file containing english tulu sentence pairs
     for line in f:
         z = line.split(',')
         tl = translateTulu(z[0])

@@ -12,6 +12,8 @@ if __name__ == "__main__":
     password = "Wvkgl4wC8yQD8HrHJCrUWhAbs1RJ4EkWYfT8BsIGDIo"
     app = App(uri, user, password)
 
+import add
+import generate
 
 window = tk.Tk()
 
@@ -29,6 +31,7 @@ label = Label(window, image = img).pack()
 
 mode = tk.IntVar()
 lang = tk.IntVar()
+buttonval = tk.StringVar()
 
 def enterSent_submit():
 
@@ -163,8 +166,12 @@ def translateSent_button():
 
 
 
-def which_button(button_press): #dispays on the terminal which button - correct/question mark/incorrect was clicked
+def which_button(s, button_press, x): #dispays on the terminal which button - correct/question mark/incorrect was clicked
+    #corrval = button_press
     print(button_press)
+    generate.update_prob(s, button_press, app)
+    x.destroy()
+    generateSent_button()
 
 
 def generateSent_button():
@@ -178,11 +185,11 @@ def generateSent_button():
 
     text = Text(generateSent_window, height = 5, width = 70, font=40, bg='black', fg='white')
     tk.Label(generateSent_window, text="generated some sentence....",fg = "tomato",bg='white',font = "Verdana 32 bold").pack(pady=20, anchor='center')
-    sentGenerated="a man is flying"
-    text.insert(END, sentGenerated)
-    text.pack()
 
-    #insert 3 images of correct, incorrect, questionmark
+    sentGenerated=generate.generate_sentence(app)
+    text.insert(END, sentGenerated[0])
+    text.pack()
+        #insert 3 images of correct, incorrect, questionmark
     correct=Image.open('correct.png')
     correct=correct.resize((150,150))
     correct=ImageTk.PhotoImage(correct)
@@ -195,13 +202,13 @@ def generateSent_button():
     questionmark=questionmark.resize((150,150))
     questionmark=ImageTk.PhotoImage(questionmark)
 
-
     tk.Label(image=correct)
-    cbuttton=tk.Button(generateSent_window,image=correct,borderwidth=0,command=lambda m='correct': which_button((m))).pack(padx= 70, pady= 80, side=LEFT, anchor='w')
+    cbutton=tk.Button(generateSent_window,image=correct,borderwidth=0,command=lambda m='correct': which_button(sentGenerated[1], m, generateSent_window)).pack(padx= 70, pady= 80, side=LEFT, anchor='w')
     tk.Label(image=questionmark)
-    qbutton=tk.Button(generateSent_window,image=questionmark,borderwidth=0,command=lambda m='questionmark': which_button((m))).pack(padx= 70, pady= 80, side=LEFT, anchor='center')
+    qbutton=tk.Button(generateSent_window,image=questionmark,borderwidth=0,command=lambda m='questionmark': which_button(sentGenerated[1], m, generateSent_window)).pack(padx= 70, pady= 80, side=LEFT, anchor='center')
     tk.Label(image=incorrect)
-    ibutton=tk.Button(generateSent_window,image=incorrect,borderwidth=0,command=lambda m='incorrect': which_button((m))).pack(padx= 70, pady= 80, side=LEFT, anchor='e')
+    ibutton=tk.Button(generateSent_window,image=incorrect,borderwidth=0,command=lambda m='incorrect': which_button(sentGenerated[1], m, generateSent_window)).pack(padx= 70, pady= 80, side=LEFT, anchor='e')
+    #generate.update_prob(sentGenerated[1], buttonval.get(), app)
 
     generateSent_window.mainloop()
 

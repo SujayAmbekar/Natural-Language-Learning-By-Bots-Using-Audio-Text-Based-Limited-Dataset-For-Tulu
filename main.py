@@ -21,28 +21,23 @@ if __name__ == "__main__":
         f.close()
 
 #Input interface.
-    print("Enter 1 to add a sentence. Enter 0 to stop.")
-    while(input()=='1'):
-        add.addSentence()
-        print("Enter 1 to add a sentence. Enter 0 to stop.")
+    i=10
+    while(i):
+        print("Enter 1 to add a sentence.\nEnter 2 to generate a sentence.\nEnter 3 to translate a sentence.\nEnter 4 to check accuracy of translation.\nEnter 0 to stop.")
+        i=int(input())
+        if i==1:
+            add.addSentence(app)
+        if i==2:
+            generate.generate_sentence(app)
+        if i==4:
+            print("Accuracy of translation is currently at" + translate.test_tls(app) +"%.")
+        if i==3:
+            sentence = input("Enter sentence to be translated.")
+    #       if input("What language input E or T?")=='E':
+            translate.translateEnglish(sentence, app)
+    #       else:
+    #           translate.translateTulu(sentence, app)
 
-    print("Enter 1 to generate a sentence. Enter 0 to stop.")
-    while(input()=='1'):
-#        generate.generate_sentence(app)
-        print("Enter 1 to generate a sentence. Enter 0 to stop.")
-
-    print("Enter 1 to check accuracy of translation. Enter 0 to stop.")
-    while(input()=='1'):
-        #print("Accuracy of translation is currently at" + translate.test_tls("testdata.csv", app) +"%.")
-        print("Enter 1 to check accuracy of translation. Enter 0 to stop.")
-
-    print("Enter 1 to translate a sentence. Enter 0 to stop.")
-    while(input()=='1'):
-#       sentence = input("Enter sentence to be translated.")
-#       if input("What language input E or T?")=='E':
-#           translate.translateEnglish(sentence, app)
-#       else:
-#           translate.translateTulu(sentence, app)
-        print("Enter 1 to translate a sentence. Enter 0 to stop.")
-
+#    translate.translateTulu("puchchae mara", app)
+#    translate.translateEnglish("big cat inside tree", app)
     app.close()

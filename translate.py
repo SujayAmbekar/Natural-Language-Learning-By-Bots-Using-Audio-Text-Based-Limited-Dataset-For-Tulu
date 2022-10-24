@@ -3,6 +3,8 @@ from WordErrorRate import wer
 import string
 from graph import App
 import nltk
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
 def removePunctuation(sentence):
     x = sentence.replace("'", "")
@@ -19,8 +21,12 @@ def translateTulu(text, app):
     return(" ".join(tl))
 
 def translateEnglish(text, app):
-    wordList = nltk.pos_tag(removePunctuation(text).split())
+    #wordList = nltk.pos_tag(removePunctuation(text).split())
+    text = removePunctuation(text)
+    doc = nlp(text)
+    wordList = [(token.text, token.tag_) for token in doc]
     tl = []
+    print(wordList)
     for word in wordList:
         translations = tle(word[0], word[1], app)
         tl.append(translations[0])
@@ -34,6 +40,7 @@ def tlt(tword, app):
     #refine for multi translation case
     return app.translate_tulu(tword)
 
+#do this
 def translate_path(f, sent):
     trans = []
     tagged = nltk.pos_tag(nltk.word_tokenise(engSent))

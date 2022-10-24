@@ -7,6 +7,8 @@ def closestToZero(d2k, cv):
     d = {}
     for i in cv:
         d[i] = abs(d2k[i])
+    if len(d)==0:
+        return "END"
     m = min(d.values())
     ans = []
     for i in d:
@@ -42,16 +44,23 @@ def findpath(f):
         cv = set(d1k).intersection(set(d2k.keys()))
     return res
 
+def update_prob(poslist, val, app):
+    print(val)
+    if val=="correct":
+        add.createPOSer(poslist, app)
+    if val=="incorrect":
+        add.createPOSer(poslist, app, -1)
 
 def generate_sentence(app):
-    poslist = findpath("tuluPOS.txt")
+    poslist = findpath("engPOS.txt")
     ans=[]
     for i in poslist:
-        x = app.find_same_type(i)
+        ans.append(app.find_same_type(i))
     x  =' '.join(ans)
-    w = input("Is this sentence correct in terms of semantics? Y/N/X")
-    if w=="Y":
-        add.createPOSer(poslist, app)
-    elif w=="N":
-        add.createPOSer(poslist, app, -1)
-    return x
+#    print(x)
+#    w = input("Is this sentence correct in terms of semantics? Y/N/X")
+#    if w=="Y":
+#        add.createPOSer(poslist, app)
+#    elif w=="N":
+#        add.createPOSer(poslist, app, -1)
+    return (x, poslist)

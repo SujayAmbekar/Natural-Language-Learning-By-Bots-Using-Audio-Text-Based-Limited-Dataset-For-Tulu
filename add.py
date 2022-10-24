@@ -1,3 +1,9 @@
+import string
+import nltk
+import pickle
+import spacy
+nlp = spacy.load("en_core_web_sm")
+
 def addWord(engW, tuluW, wType, gender, app):
     if (app.find_word(engW)==0):
         app.create_node(engW, "English")
@@ -21,15 +27,18 @@ def removePunctuation(sentence):
     y = y.lower()
     return y
 
-def addSentence():
+def addSentence(app):
     eSent = removePunctuation(input("Enter English sentence.\n").lower())
     tSent = removePunctuation(input("Enter Tulu sentence.\n"))
-    addWord(eSent, tSent, "Sentence", "None")
-    eWords = eSent.split(' ')
-    tWords = tSent.split(' ')
-    for word in eWords:
-        word = removePunctuation(word)
-    eWords = nltk.pos_tag(eWords)
+    addWord(eSent, tSent, "Sentence", "None", app)
+#    eWords = eSent.split(' ')
+#    tWords = tSent.split(' ')
+#    for word in eWords:
+#        word = removePunctuation(word)
+
+    doc = nlp(eSent)
+    eWords = [(token.text, token.tag_) for token in doc]
+#    eWords = nltk.pos_tag(eWords)
     tags = [i[1] for i in eWords]
 #    open_file = open("engPOS.txt", "wb")
 #    pickle.dump([{}, {}], open_file)

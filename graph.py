@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
 import logging
 from neo4j.exceptions import ServiceUnavailable
-
+import random
 class App:
 
     def __init__(self, uri, user, password):
@@ -137,14 +137,16 @@ class App:
             result = session.read_transaction(self._find_and_return_same_type, type)
             for row in result:
                 print("Found word: {row}".format(row=row))
-                return [row["name"] for row in result]
+            w = [row for row in result]
+        return w[0]
 
     @staticmethod
     def _find_and_return_same_type(tx, type):
         query = (
             "MATCH (e:word)-[r:TL]->(t:word) "
             "WHERE r.type = $type "
-            "RETURN t.name AS name "
+            "RETURN t.name AS name, rand() as ran "
+            "ORDER BY ran "
             "LIMIT 1"
         )
         result = tx.run(query, type=type)

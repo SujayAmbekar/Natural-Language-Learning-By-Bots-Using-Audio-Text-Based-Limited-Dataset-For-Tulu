@@ -33,10 +33,10 @@ if __name__ == "__main__":
             print("Accuracy of translation is currently at" + translate.test_tls(app) +"%.")
         if i==3:
             sentence = input("Enter sentence to be translated.")
-    #       if input("What language input E or T?")=='E':
-            translate.translateEnglish(sentence, app)
-    #       else:
-    #           translate.translateTulu(sentence, app)
+            if input("What language input E or T?")=='E':
+                print(translate.translateEnglish(sentence, app))
+            else:
+                print(translate.translateTulu(sentence, app))
 
 #    translate.translateTulu("puchchae mara", app)
 #    translate.translateEnglish("big cat inside tree", app)

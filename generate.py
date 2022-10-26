@@ -45,14 +45,14 @@ def findpath(f):
     return res
 
 def update_prob(poslist, val, app):
-    print(val)
     if val=="correct":
         add.createPOSer(poslist, app)
     if val=="incorrect":
         add.createPOSer(poslist, app, -1)
 
 def generate_sentence(app):
-    poslist = findpath("engPOS.txt")
+    poslist = findpath("tuluPOS.txt")
+    print(poslist)
     ans=[]
     for i in poslist:
         ans.append(app.find_same_type(i))

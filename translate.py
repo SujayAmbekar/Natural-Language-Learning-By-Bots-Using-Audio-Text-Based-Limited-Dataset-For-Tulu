@@ -15,21 +15,34 @@ def removePunctuation(sentence):
 def translateTulu(text, app):
     wordList = removePunctuation(text).split(" ")
     tl = []
+    text = removePunctuation(text)
+    w = tlt(text, app)
+    for i in w:
+        if i[1]=="Sentence":
+            return i[0]
     for word in wordList:
         translations = tlt(word, app)
-        tl.append(translations[0])
+        if len(translations)==0:
+            tl.append(word)
+        else:
+            tl.append(translations[0][0])
     return(" ".join(tl))
 
 def translateEnglish(text, app):
     #wordList = nltk.pos_tag(removePunctuation(text).split())
+    w = tle(removePunctuation(text), "Sentence", app)
+    if len(w):
+        return w[0]
     text = removePunctuation(text)
     doc = nlp(text)
     wordList = [(token.text, token.tag_) for token in doc]
     tl = []
-    print(wordList)
     for word in wordList:
         translations = tle(word[0], word[1], app)
-        tl.append(translations[0])
+        if len(translations)==0:
+            tl.append(word[0])
+        else:
+            tl.append(translations[0])
     return(" ".join(tl))
 
 def tle(eword, pos, app):

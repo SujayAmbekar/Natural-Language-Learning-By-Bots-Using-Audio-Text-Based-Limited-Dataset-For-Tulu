@@ -28,23 +28,55 @@ def removePunctuation(sentence):
     return y
 
 def addSentence(app):
-    eSent = removePunctuation(input("Enter English sentence.\n").lower())
-    tSent = removePunctuation(input("Enter Tulu sentence.\n"))
-    addWord(eSent, tSent, "Sentence", "None", app)
-#    eWords = eSent.split(' ')
-#    tWords = tSent.split(' ')
-#    for word in eWords:
-#        word = removePunctuation(word)
+    eSent = input("Enter English sentence.\n")
+    tSent = input("Enter Tulu sentence.\n")
+    addSent(eSent, tSent, app)
 
+def getinfo(engw, pos, app):
+    tw = input("What does "+engw+" translate to in the given sentence if POS is "+pos+" ?").lower()
+    gender = input("What is the gender? Enter masculine/feminine/neuter/NULL. ")
+    addWord(engw, tw, pos, gender, app)
+
+def getinfot(tw, app):
+    engw = input("What does "+tw+" translate to in the given sentence?").lower()
+    gender = input("What is the gender? Enter masculine/feminine/neuter/NULL. ")
+    e = nlp(engw)
+    pos = e[0].tag_
+    addWord(engw, tw, pos, gender, app)
+
+def addSent(eSent, tSent, app):
+    eSent = removePunctuation(eSent)
+    tSent = removePunctuation(tSent)
+    addWord(eSent, tSent, "Sentence", "None", app)
+    eWords = eSent.split(' ')
+    tWords = tSent.split(' ')
     doc = nlp(eSent)
-    eWords = [(token.text, token.tag_) for token in doc]
+    eWord = [(token.text, token.tag_) for token in doc]
 #    eWords = nltk.pos_tag(eWords)
-    tags = [i[1] for i in eWords]
+    tags = [i[1] for i in eWord]
+    for i in eWord:
+        if app.find_word(i[0]):
+            if app.translate_english(i[0], i[1]) in tWords:
+                continue
+        else:
+            getinfo(i[0], i[1], app)
+    for i in tWords:
+        if app.find_word(i):
+            if app.translate_tulu(i) in eWords:
+                continue
+        else:
+            getinfot(i, app)
+    ttags = []
+    for i in tWords:
+        print(i)
+        print(app.translate_tulu(i))
+        ttags.append(app.translate_tulu(i)[0][1])
+    print(ttags)
 #    open_file = open("engPOS.txt", "wb")
 #    pickle.dump([{}, {}], open_file)
 #    open_file.close()
     createPOSer(tags, "E")
-    #add words and links to graph
+    createPOSer(ttags, "T")
 
 def createPOSer(tags, language, weight=1):
     if language == "E":
@@ -57,7 +89,6 @@ def createPOSer(tags, language, weight=1):
         fi.close()
     d = f[0]
     seqs = f[1]
-    print(d, seqs)
     #d = {'L1':[noun, pronoun, article], 'L2':['adj','noun']}
     if "START" not in seqs.keys():
         seqs["START"] = dict()

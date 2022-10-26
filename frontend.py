@@ -4,6 +4,7 @@ from PIL import ImageTk, Image #pip install Pillow for this
 import audio
 import os
 import translate
+import time
 from graph import App
 if __name__ == "__main__":
     print("Started app.")
@@ -28,6 +29,8 @@ tk.Label(window, text="WELCOME TO TULU-ENGLISH TRANSLATOR!",fg = "tomato",bg='wh
 
 img = ImageTk.PhotoImage(Image.open("translator.jpeg"))
 label = Label(window, image = img).pack()
+window.iconphoto(False, img)
+
 
 mode = tk.IntVar()
 lang = tk.IntVar()
@@ -40,7 +43,7 @@ def enterSent_submit():
 
     print("English entry : " + eng)
     print("Tulu entry : " + tulu)
-
+    add.addSent(eng, tulu, app)
     eng_var.set("")
     tulu_var.set("")
 
@@ -98,7 +101,10 @@ def translateSentAudio_button():
 
 def texttranslate(inputtxt,lbl):
     inp = inputtxt.get(1.0, "end-1c")
-    oup = translate.translateEnglish(inp, app)
+    if lang.get()==1:
+        oup = translate.translateEnglish(inp, app)
+    else:
+        oup = translate.translateTulu(inp, app)
     lbl.config(text = "Translated text: "+oup, font = "Verdana 27 bold")  #have to pass inp as the actual translated text
     #return inputtxt
 
@@ -109,10 +115,14 @@ def translateSentText_button():
     translateSentText_window.title("Button Window")
     translateSentText_window.geometry("1500x900+10+10")
     tk.Label(translateSentText_window).pack()
+    if lang.get()==1:
+        l="English"
+    else:
+        l="Tulu"
 
     tk.Label(translateSentText_window, text="WELCOME TO TULU-ENGLISH TRANSLATOR!",fg = "tomato",bg='white',font = "Verdana 32 bold").pack(pady=20)
     tk.Label(translateSentText_window, text="Translate Sentence using Text",fg = "black",font = "Verdana 27 bold").pack(pady=20, side=TOP, anchor='w')
-
+    tk.Label(translateSentText_window, text="Speak in "+l,fg = "black",font = "Verdana 15 bold").pack(pady=20, side=TOP, anchor='w')
     tk.Label(translateSentText_window, text="Enter your input:",fg = "black",font = "Verdana 27 bold").pack(pady=20, side=TOP, anchor='center')
 
     inputtxt=Text(translateSentText_window, height = 5, width = 70, font=40)
@@ -126,19 +136,14 @@ def translateSentText_button():
 
 
 def display_input():
-    translateSent_window = Toplevel(window)
-
     if mode.get()==2:
         print("text var 1")
-        #translateSentText_button=
-        tk.Button(translateSent_window, text="OK",fg = "blue",bg='white',font = "Verdana 26 bold", command=translateSentText_button).pack(side=RIGHT, anchor='nw', padx=25, pady=5)
-        #ok_button.config(translateSent_window,command=translateSentText_button).pack()
-        #ok_text.pack()
+        translateSentText_button()
     elif mode.get()==1:
         print("audio var 1")
-        tk.Button(translateSent_window, text="OK",fg = "blue",bg='white',font = "Verdana 26 bold", command=translateSentAudio_button).pack(side=RIGHT, anchor='nw', padx=25, pady=5)
-        #ok_button.config(translateSent_window,command=translateSentAudio_button).pack()
-        #ok_audio.pack()
+        translateSentAudio_button()
+#    tk.Button(translateSent_window, text="OK",fg = "blue",bg='white',font = "Verdana 26 bold", command=nextwd).pack(side=RIGHT, anchor='nw', padx=25, pady=5)
+
 
 def translateSent_button():
     translateSent_window = Toplevel(window)
@@ -153,15 +158,20 @@ def translateSent_button():
     tk.Radiobutton(translateSent_window, text="Tulu",variable=lang,fg = "black",bg='white',indicatoron = 0, font = "Verdana 26 bold",value=2).pack(side=TOP, anchor='center', padx=25, pady=15)
 
     tk.Label(translateSent_window, text="Input Format:",fg = "black",font = "Verdana 27 bold").pack(pady=20, side=TOP, anchor='center')
-    t1 = tk.Radiobutton(translateSent_window, text="Audio input", variable=mode, indicatoron = 0, command=display_input,fg = "black",bg='white',font = "Verdana 26 bold",value=1)
+    t1 = tk.Radiobutton(translateSent_window, text="Audio input", variable=mode, indicatoron = 0, fg = "black",bg='white',font = "Verdana 26 bold",value=1)
     t1.pack(side=TOP, anchor='center', padx=25, pady=5)
-    t2 = tk.Radiobutton(translateSent_window, text="Text input", variable=mode, indicatoron = 0, command=display_input,fg = "black",bg='white',font = "Verdana 26 bold", value=2)
+    t2 = tk.Radiobutton(translateSent_window, text="Text input", variable=mode, indicatoron = 0, fg = "black",bg='white',font = "Verdana 26 bold", value=2)
     t2.pack(side=TOP, anchor='center', padx=25, pady=5)
-
-
-    tk.Button(translateSent_window, text="OK",fg = "blue",bg='white',font = "Verdana 26 bold").pack(side=RIGHT, anchor='nw', padx=25, pady=5)
+    tk.Button(translateSent_window, text="OK",fg = "blue",bg='white',font = "Verdana 26 bold", command=display_input).pack(side=RIGHT, anchor='nw', padx=25, pady=5)
     print('mode of translation:',mode.get())
     print('language:',lang.get())
+    if mode.get()==2:
+        nextwd = translateSentText_button
+    elif mode.get()==1:
+        nextwd = translateSentAudio_button
+
+#    tk.Button(translateSent_window, text="OK",fg = "blue",bg='white',font = "Verdana 26 bold", command=nextwd).pack(side=RIGHT, anchor='nw', padx=25, pady=5)
+
     translateSent_window.mainloop()
 
 
@@ -248,10 +258,13 @@ text_var = tk.IntVar()  #variable under translateSent_button
 eng_var=tk.StringVar() #variable under generateSent_button
 tulu_var=tk.StringVar()#variable under generateSent_button
 
+def quitbutton():
+    window.destroy()
+
 tk.Button(window, text="Start",fg = "blue",bg='white',font = "Verdana 26 bold", command=start_button).pack(pady= 70)
+tk.Button(window, text="Quit",fg = "blue",bg='white',font = "Verdana 26 bold", command=quitbutton).pack()
 info=Image.open('info.png')
 info=info.resize((50,50))
 info=ImageTk.PhotoImage(info)
 tk.Button(window, text="   Info",font='Helvetica 25 bold',fg = "black",bg='white',image=info,compound=LEFT, command=info_button).pack(anchor='e',side='bottom')
-
 window.mainloop() #this is reqd for the tkinter window to open

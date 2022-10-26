@@ -39,7 +39,7 @@ class App:
 
     @staticmethod
     def _translate_tulu(tx, tuluW):
-        query = ("MATCH (b)-[r:TL]->(a) "
+        query = ("MATCH (a)-[r:TL]->(b) "
                 "WHERE b.name = $tuluW "
                 "RETURN a.name AS word, r.type AS type")
         result = tx.run(query, tuluW=tuluW)
@@ -55,7 +55,7 @@ class App:
 
     @staticmethod
     def _translate_engW(tx, engW, type):
-        query = ("MATCH (b)-[r:TL]->(a) "
+        query = ("MATCH (a)-[r:TL]->(b) "
                 "WHERE a.name = $engW AND r.type = $type "
                 "RETURN b.name AS word")
         result = tx.run(query, engW=engW, type=type)

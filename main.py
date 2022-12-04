@@ -2,7 +2,7 @@ from graph import App
 import string
 import nltk
 import pickle
-
+import audio
 import add
 import generate
 import translate
@@ -14,11 +14,11 @@ if __name__ == "__main__":
     password = "Wvkgl4wC8yQD8HrHJCrUWhAbs1RJ4EkWYfT8BsIGDIo"
     app = App(uri, user, password)
 #Adding from dataset to graph.
-    print("Enter 1 to add from dataset. Enter 0 to skip.")
-    if(input()=='1'):
-        f = open("data.csv", "r", encoding='utf-8')
-        add.addFromDataset(f, app)
-        f.close()
+#    print("Enter 1 to add from dataset. Enter 0 to skip.")
+#    if(input()=='1'):
+#        f = open("data.csv", "r", encoding='utf-8')
+#        add.addFromDataset(f, app)
+#        f.close()
 
 #Input interface.
     i=10
@@ -30,14 +30,14 @@ if __name__ == "__main__":
         if i==2:
             generate.generate_sentence(app)
         if i==4:
-            print("Accuracy of translation is currently at" + translate.test_tls(app) +"%.")
+            print("Accuracy of translation for easy dataset is at" + str("{0:.4f}".format((1-translate.test_tls("dataeasy.csv", app))*100) +"%."))
+            print("Accuracy of translation for hard dataset is at" + str("{0:.4f}".format((1-translate.test_tls("datahard.csv", app))*100) +"%."))
+            print("Accuracy of translation for complex dataset is at" + str("{0:.4f}".format((1-translate.test_tls("datacomp.csv", app))*100) +"%."))
         if i==3:
+            sentence = "Rama and cats have played."
             sentence = input("Enter sentence to be translated.")
             if input("What language input E or T?")=='E':
                 print(translate.translateEnglish(sentence, app))
             else:
                 print(translate.translateTulu(sentence, app))
-
-#    translate.translateTulu("puchchae mara", app)
-#    translate.translateEnglish("big cat inside tree", app)
     app.close()

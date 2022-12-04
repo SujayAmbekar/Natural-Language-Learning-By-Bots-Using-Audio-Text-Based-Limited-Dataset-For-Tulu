@@ -1,8 +1,9 @@
 import string
 import nltk
 import pickle
-import spacy
-nlp = spacy.load("en_core_web_sm")
+from spacy import load
+from pymsgbox import prompt
+nlp = load("en_core_web_sm")
 
 def addWord(engW, tuluW, wType, gender, app):
     if (app.find_word(engW)==0):
@@ -33,13 +34,17 @@ def addSentence(app):
     addSent(eSent, tSent, app)
 
 def getinfo(engw, pos, app):
-    tw = input("What does "+engw+" translate to in the given sentence if POS is "+pos+" ?").lower()
-    gender = input("What is the gender? Enter masculine/feminine/neuter/NULL. ")
+    tw = (prompt("What does "+engw+" translate to in the given sentence if POS is "+pos+" ?")).lower()
+#    tw = input("What does "+engw+" translate to in the given sentence if POS is "+pos+" ?").lower()
+    gender = prompt("What is the gender? Enter masculine/feminine/neuter/NULL. ")
+#    gender = input("What is the gender? Enter masculine/feminine/neuter/NULL. ")
     addWord(engw, tw, pos, gender, app)
 
 def getinfot(tw, app):
-    engw = input("What does "+tw+" translate to in the given sentence?").lower()
-    gender = input("What is the gender? Enter masculine/feminine/neuter/NULL. ")
+    engw = pymsgbox.prompt("What does "+tw+" translate to in the given sentence?").lower()
+#    engw = input("What does "+tw+" translate to in the given sentence?").lower()
+    gender = pymsgbox.prompt("What is the gender? Enter masculine/feminine/neuter/NULL. ")
+#    gender = input("What is the gender? Enter masculine/feminine/neuter/NULL. ")
     e = nlp(engw)
     pos = e[0].tag_
     addWord(engw, tw, pos, gender, app)
@@ -68,10 +73,7 @@ def addSent(eSent, tSent, app):
             getinfot(i, app)
     ttags = []
     for i in tWords:
-        print(i)
-        print(app.translate_tulu(i))
         ttags.append(app.translate_tulu(i)[0][1])
-    print(ttags)
 #    open_file = open("engPOS.txt", "wb")
 #    pickle.dump([{}, {}], open_file)
 #    open_file.close()
@@ -79,6 +81,7 @@ def addSent(eSent, tSent, app):
     createPOSer(ttags, "T")
 
 def createPOSer(tags, language, weight=1):
+    tags.append('END')
     if language == "E":
         fi = open("engPOS.txt", "rb")
         f = pickle.load(fi)
@@ -95,7 +98,6 @@ def createPOSer(tags, language, weight=1):
     seqs["START"][tags[0]] = 0
     if tags[-1] not in seqs.keys():
         seqs[tags[-1]] = dict()
-    seqs[tags[-1]]["END"] = 0
     #seqs = {noun:{prp: 3, vb: 4}, }
     for i in range(len(tags)):
         ind = "L"+str(i)

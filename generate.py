@@ -29,6 +29,8 @@ def findpath(f):
     res = []
     cv = set()
     curr = random.choice(d1['L0'])
+    while(curr=="END"):
+        curr = random.choice(d1['L0'])
     res.append(curr)
     if curr in d2.keys():
         d2k = d2[curr] #dict of possible next pos
@@ -36,7 +38,7 @@ def findpath(f):
         cv = set(d1k).intersection(set(d2k.keys()))
     for i in range(1, len(d1.keys())-1):
         curr = closestToZero(d2k, cv)
-        if curr=="END":
+        if (curr=="END"):
             break
         res.append(curr)
         d2k = d2[curr]
@@ -52,12 +54,18 @@ def update_prob(poslist, val, app):
 
 def generate_sentence(app):
     poslist = findpath("tuluPOS.txt")
+    flag=0
     print(poslist)
     ans=[]
     for i in poslist:
         ans.append(app.find_same_type(i))
+        if i in ['WRB', 'WP', 'WDT', 'WP$', 'RB']:
+            flag=1
     x  =' '.join(ans)
-#    print(x)
+    if not flag:
+        x=x+'.'
+    if flag:
+        x=x+'?'
 #    w = input("Is this sentence correct in terms of semantics? Y/N/X")
 #    if w=="Y":
 #        add.createPOSer(poslist, app)

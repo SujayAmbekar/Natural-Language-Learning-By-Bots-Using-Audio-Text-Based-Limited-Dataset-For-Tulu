@@ -33,8 +33,8 @@ class App:
     def translate_tulu(self, tuluW):
         with self.driver.session() as session:
             result = session.read_transaction(self._translate_tulu, tuluW)
-            for row in result:
-                print("The translation of "+tuluW+ " is {w1} if the word type is {w2}.".format(w1=row['word'], w2=row['type']))
+#            for row in result:
+#                print("The translation of "+tuluW+ " is {w1} if the word type is {w2}.".format(w1=row['word'], w2=row['type']))
             return [(row['word'], row['type']) for row in result]
 
     @staticmethod
@@ -49,8 +49,8 @@ class App:
     def translate_english(self, engW, type):
         with self.driver.session() as session:
             result = session.read_transaction(self._translate_engW, engW, type)
-            for row in result:
-                print("The translation of "+engW+ " is {a}.".format(a=row['word']))
+#            for row in result:
+#                print("The translation of "+engW+ " is {a}.".format(a=row['word']))
             return [row['word'] for row in result]
 
     @staticmethod
@@ -61,9 +61,24 @@ class App:
         result = tx.run(query, engW=engW, type=type)
         return [{"word": row["word"]} for row in result]
 
+#RETURNING TRANSLATION OF AN ENGLISH NGRAM
+    def translate_ngram(self, engW):
+        with self.driver.session() as session:
+            result = session.read_transaction(self._translate_ngram, engW)
+#            for row in result:
+#                print("The translation of "+engW+ " is {a}, type is {b}.".format(a=row['word'], b=row['type']))
+            return [(row['word'], row['type']) for row in result]
+
+    @staticmethod
+    def _translate_ngram(tx, engW):
+        query = ("MATCH (a)-[r:TL]->(b) "
+                "WHERE a.name = $engW "
+                "RETURN b.name AS word, r.type AS type")
+        result = tx.run(query, engW=engW)
+        return [{"word": row["word"], "type": row["type"]} for row in result]
+
 #CONNECTION CREATION
     def create_link(self, engW, tuluW, type, gender):
-        print("Creating link")
         with self.driver.session() as session:
             result = session.write_transaction(self._create_link, engW, tuluW, type, gender)
             for row in result:
@@ -71,7 +86,6 @@ class App:
 
     @staticmethod
     def _create_link(tx, engW, tuluW, type, gender):
-        print("Creating link part 2")
         query = ("MATCH (a:word), (b:word) "
             "WHERE a.name = $engW AND b.name = $tuluW "
             "CREATE (a)-[r:TL {type:$type, gender:$gender}]->(b) "
@@ -87,18 +101,16 @@ class App:
 
 #FINDING NODE
     def find_word(self, word):
-        print("Finding node")
         with self.driver.session() as session:
             result = session.read_transaction(self._find_and_return_word, word)
             for row in result:
-                print("Found word: {row}".format(row=row))
+#                print("Found word: {row}".format(row=row))
                 return row
             return 0
 
 
     @staticmethod
     def _find_and_return_word(tx, word):
-        print("Finding node part 2")
         query = (
             "MATCH (w:word) "
             "WHERE w.name = $word "
@@ -110,17 +122,15 @@ class App:
 #CHECKING CONNECTION BETWEEN TWO NODES
 
     def find_link(self, eng, tulu):
-        print("Finding link")
         with self.driver.session() as session:
             result = session.read_transaction(self._find_and_return_link, eng, tulu)
             for row in result:
-                print("Found connection: {row}".format(row=row))
+#                print("Found connection: {row}".format(row=row))
                 return row
             return 0
 
     @staticmethod
     def _find_and_return_link(tx, eng, tulu):
-        print("Finding link part 2")
         query = (
             "MATCH (e:word)-[r:TL]->(t:word) "
             "WHERE e.name = $eng and t.name= $tulu "
@@ -135,9 +145,11 @@ class App:
     def find_same_type(self, type):
         with self.driver.session() as session:
             result = session.read_transaction(self._find_and_return_same_type, type)
-            for row in result:
-                print("Found word: {row}".format(row=row))
+#            for row in result:
+#                print("Found word: {row}".format(row=row))
             w = [row for row in result]
+        if len(w)==0:
+            return ''
         return w[0]
 
     @staticmethod
